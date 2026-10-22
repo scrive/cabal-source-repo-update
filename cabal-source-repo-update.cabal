@@ -1,0 +1,37 @@
+cabal-version:      3.0
+name:               cabal-source-repo-update
+version:            0.1.0.0
+synopsis:           Update your source-repository-packages
+-- description:
+homepage:           https://github.com/scrive/cabal-source-repo-update
+license:            BSD-3-Clause
+license-file:       LICENSE
+author:             Francesco Gazzetta, Giorgio Marinelli
+maintainer:         francesco.gazzetta@scrive.com
+copyright:          Scrive AB
+category:           Distribution
+build-type:         Simple
+extra-doc-files:    CHANGELOG.md
+
+common warnings
+    ghc-options: -Wall
+
+library
+    import:           warnings
+    exposed-modules:  Distribution.CabalSourceRepoUpdate
+    build-depends:
+        base >=4.20 && <4.22,
+        bytestring,
+        Cabal-syntax,
+    hs-source-dirs:   src
+    default-language: GHC2021
+
+executable cabal-source-repo-update
+    import:           warnings
+    main-is:          Main.hs
+    build-depends:
+        base >=4.20 && <4.22,
+        cabal-source-repo-update,
+
+    hs-source-dirs:   app
+    default-language: GHC2021

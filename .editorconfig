@@ -1,0 +1,17 @@
+root = true
+
+[*.{cabal,hs,nix,project,sh,yml}]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+[*.{cabal,hs,nix,sh,yml}]
+indent_style = space
+# Not strictly enforced due to alignment.
+# It's still useful to have this here to autoconfigure autoindent.
+indent_size = 2
+
+[cabal.project]
+indent_style = space
+indent_size = 4
