@@ -24,6 +24,7 @@ data SRP = SRP
   , tagPos :: TagPos
   , newTag :: Maybe Tag
   }
+  deriving Show
 
 -- Extract SRPs from cabal.project
 extract :: [C.Field C.Position] -> [SRP]
@@ -42,7 +43,7 @@ fieldLineValue :: C.FieldLine ann -> ByteString
 fieldLineValue (C.FieldLine _ bs) = bs
 
 fieldLinesValue :: [C.FieldLine ann] -> ByteString
-fieldLinesValue = BS.unlines . fmap fieldLineValue
+fieldLinesValue = BS.intercalate "\n" . fmap fieldLineValue
 
 stanzaToSRP :: [C.Field C.Position] -> Maybe SRP
 stanzaToSRP fs = SRP
