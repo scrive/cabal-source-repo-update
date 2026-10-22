@@ -23,6 +23,7 @@ library
         base >=4.20 && <4.22,
         bytestring,
         Cabal-syntax,
+        extra,
     hs-source-dirs:   src
     default-language: GHC2021
 
