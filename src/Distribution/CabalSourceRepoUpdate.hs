@@ -33,8 +33,9 @@ extract :: [C.Field C.Position] -> [SRP]
 extract = mapMaybe fieldToSRP
 
 fieldToSRP :: C.Field C.Position -> Maybe SRP
-fieldToSRP (C.Section (C.Name _ "source-repository-package") _ fields) =
-  stanzaToSRP fields
+fieldToSRP (C.Section (C.Name _ "source-repository-package") _ fields)
+  | fmap fieldLinesValue (findField "x-update" fields) == Just "true"
+  = stanzaToSRP fields
 fieldToSRP _ = Nothing
 
 fieldLinesPos :: [C.FieldLine C.Position] -> C.Position
