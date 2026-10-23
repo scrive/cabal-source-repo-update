@@ -1,5 +1,6 @@
 module Main (main) where
 
+import Control.Monad.Extra (mapMaybeM)
 import Data.ByteString qualified as BS
 import Distribution.CabalSourceRepoUpdate
 import Distribution.Fields qualified as C
@@ -18,6 +19,6 @@ main = do
   contents <- BS.readFile projectFile
   let Right fields = C.readFields contents
   let srps = extract fields
-  patches <- traverse update srps
+  patches <- mapMaybeM update srps
   BS.putStr $ prettyPatches patches
   BS.writeFile projectFile $ applyPatches patches contents

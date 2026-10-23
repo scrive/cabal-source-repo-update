@@ -75,11 +75,11 @@ findField fn = firstJust f
     f _ = Nothing
 
 -- | Query repo for latest tag
-update :: SRP -> IO Patch
+update :: SRP -> IO (Maybe Patch)
 update srp = do
   BS.putStrLn $ "Checking " <> location srp
   newTag <- fetchHeadHash $ location srp
-  pure $ Patch srp newTag
+  pure $ if newTag == tag srp then Nothing else Just $ Patch srp newTag
 
 fetchHeadHash :: Location -> IO Tag
 fetchHeadHash loc = do

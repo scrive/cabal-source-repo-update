@@ -37,6 +37,7 @@ executable cabal-source-repo-update
         bytestring,
         cabal-source-repo-update,
         Cabal-syntax,
+        extra,
 
     hs-source-dirs:   app
     default-language: GHC2021
