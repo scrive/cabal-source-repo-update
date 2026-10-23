@@ -1,10 +1,10 @@
 module Main (main) where
 
+import Data.ByteString qualified as BS
 import Distribution.CabalSourceRepoUpdate
 import Distribution.Fields qualified as C
-import Data.ByteString qualified as BS
-import System.Exit (exitFailure)
 import System.Environment (getArgs)
+import System.Exit (exitFailure)
 
 main :: IO ()
 main = do

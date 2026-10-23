@@ -9,18 +9,18 @@ module Distribution.CabalSourceRepoUpdate
 , replace
 ) where
 
-import Distribution.Fields qualified as C
-import qualified Data.ByteString as BS
-import qualified Data.ByteString.Char8 as BS
 import Data.ByteString (ByteString)
-import qualified Distribution.Parsec.Position as C
+import Data.ByteString qualified as BS
+import Data.ByteString.Char8 qualified as BS
 import Data.List.Extra (firstJust)
-import Data.Maybe (mapMaybe)
 import Data.Map.Strict (Map)
 import Data.Map.Strict qualified as Map
-import System.Process.Typed (readProcessStdout_, proc)
+import Data.Maybe (mapMaybe)
+import Distribution.Fields qualified as C
+import Distribution.Parsec.Position qualified as C
 import Distribution.Utils.Generic (fromUTF8BS)
 import System.Exit (die)
+import System.Process.Typed (readProcessStdout_, proc)
 
 
 type Location = ByteString
