@@ -16,6 +16,15 @@ source-repository-package
 then update it by running `cabal-source-repo-update`.
 The `tag` field will be replaced with the latest `HEAD`.
 
+## Configuration
+
+You can configure the tool's behavior by setting the following `x-` fields
+in the corresponding `source-repository-package` stanza:
+
+| Field | Accepted values | Example | Description |
+| - | - | - | - |
+| `x-tag-pattern` | Pattern as described in `git-ls-remote(1)` | `refs/tags/v*` | Instead of updating to `HEAD`, update to the latest ref (by version sort) matching the pattern |
+
 ## Limitations
 
 * Only top-level `source-repository-package`s are supported.

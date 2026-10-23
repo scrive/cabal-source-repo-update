@@ -33,6 +33,7 @@ data SRP = SRP
   { location :: Location
   , tag :: Tag
   , tagPos :: C.Position
+  , tagPattern :: Maybe ByteString
   }
   deriving Show
 
@@ -65,9 +66,11 @@ stanzaToSRP fs = SRP
   <$> fmap fieldLinesValue locField
   <*> fmap fieldLinesValue tagField
   <*> fmap fieldLinesPos tagField
+  <*> pure (fmap fieldLinesValue tagPatternField)
   where
     locField = findField "location" fs
     tagField = findField "tag" fs
+    tagPatternField = findField "x-tag-pattern" fs
 
 findField :: C.FieldName -> [C.Field ann] -> Maybe [C.FieldLine ann]
 findField fn = firstJust f
@@ -77,14 +80,15 @@ findField fn = firstJust f
 
 -- | Query repo for latest tag
 update :: SRP -> IO (Maybe Patch)
-update srp = do
-  BS.hPutStrLn stderr $ "ℹ️ Checking " <> location srp
-  newTag <- fetchHeadHash $ location srp
+update srp@SRP {location, tagPattern} = do
+  BS.hPutStrLn stderr $ "ℹ️ Checking " <> location
+  newTag <- fetchHeadHash location tagPattern
   pure $ if newTag == tag srp then Nothing else Just $ Patch srp newTag
 
-fetchHeadHash :: Location -> IO Tag
-fetchHeadHash loc = do
-  let args = ["ls-remote", fromUTF8BS loc, "HEAD"]
+fetchHeadHash :: Location -> Maybe ByteString -> IO Tag
+fetchHeadHash loc pattern = do
+  let args = ["ls-remote", "--sort=-v:refname", "--end-of-options", fromUTF8BS loc]
+        ++ maybe ["HEAD"] ((:[]) . fromUTF8BS) pattern
   output <- readProcessStdout_ $ proc "git" args
   case BS.words $ BS.toStrict output of
     hash:_ -> pure hash
