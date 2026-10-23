@@ -21,7 +21,7 @@ main = do
   let Right fields = C.readFields contents
   let srps = extract fields
   when (null srps) $
-    putStrLn "Warning: no top-level source-repository-packages marked with `x-update: true` found."
+    putStrLn "⚠️ Warning: no top-level source-repository-packages marked with `x-update: true` found."
   patches <- mapMaybeM update srps
   BS.putStr $ prettyPatches patches
   BS.writeFile projectFile $ applyPatches patches contents

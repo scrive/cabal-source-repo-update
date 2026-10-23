@@ -77,7 +77,7 @@ findField fn = firstJust f
 -- | Query repo for latest tag
 update :: SRP -> IO (Maybe Patch)
 update srp = do
-  BS.putStrLn $ "Checking " <> location srp
+  BS.putStrLn $ "ℹ️ Checking " <> location srp
   newTag <- fetchHeadHash $ location srp
   pure $ if newTag == tag srp then Nothing else Just $ Patch srp newTag
 
