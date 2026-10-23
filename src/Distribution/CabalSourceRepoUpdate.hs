@@ -12,7 +12,8 @@ import Data.Map.Strict (Map)
 import Data.Map.Strict qualified as Map
 import System.Process.Typed (readProcessStdout_, proc)
 import Distribution.Utils.Generic (fromUTF8BS)
-import System.Exit (die)
+import System.Exit (die, exitFailure)
+import System.Environment (getArgs)
 
 
 type Location = ByteString
@@ -108,9 +109,16 @@ newTagsByLine = foldl' addTag Map.empty
 
 main :: IO ()
 main = do
-  contents <- BS.readFile "cabal.project"
+  args <- getArgs
+  projectFile <- case args of
+    [fileName] -> pure fileName
+    [] -> pure "cabal.project"
+    _ -> do
+      putStrLn "usage: cabal-source-repo-update [<project file>]"
+      exitFailure
+  contents <- BS.readFile projectFile
   let Right fields = C.readFields contents
   let srps = extract fields
   srps' <- traverse update srps
   BS.putStrLn $ prettyChanges srps'
-  BS.writeFile "cabal.project" $ replace srps' contents
+  BS.writeFile projectFile $ replace srps' contents
