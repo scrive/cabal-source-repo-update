@@ -24,9 +24,13 @@ import System.IO (stderr)
 import System.Process.Typed (readProcessStdout_, proc)
 
 
-type Location = ByteString
+-- | A VCS location
+newtype Location = Location { unLocation :: ByteString }
+  deriving Show
 
-type Tag = ByteString
+-- | A VCS tag / revision
+newtype Tag = Tag { unTag :: ByteString }
+  deriving (Eq, Show)
 
 -- | The @source-repository-package@ info we need
 data SRP = SRP
@@ -63,8 +67,8 @@ fieldLinesValue = BS.intercalate "\n" . fmap fieldLineValue
 
 stanzaToSRP :: [C.Field C.Position] -> Maybe SRP
 stanzaToSRP fs = SRP
-  <$> fmap fieldLinesValue locField
-  <*> fmap fieldLinesValue tagField
+  <$> fmap (Location . fieldLinesValue) locField
+  <*> fmap (Tag . fieldLinesValue) tagField
   <*> fmap fieldLinesPos tagField
   <*> pure (fmap fieldLinesValue tagPatternField)
   where
@@ -81,17 +85,17 @@ findField fn = firstJust f
 -- | Query repo for latest tag
 update :: SRP -> IO (Maybe Patch)
 update srp@SRP {location, tagPattern} = do
-  BS.hPutStrLn stderr $ "ℹ️ Checking " <> location
+  BS.hPutStrLn stderr $ "ℹ️ Checking " <> unLocation location
   newTag <- fetchHeadHash location tagPattern
   pure $ if newTag == tag srp then Nothing else Just $ Patch srp newTag
 
 fetchHeadHash :: Location -> Maybe ByteString -> IO Tag
-fetchHeadHash loc pattern = do
+fetchHeadHash (Location loc) pattern = do
   let args = ["ls-remote", "--sort=-v:refname", "--end-of-options", fromUTF8BS loc]
         ++ maybe ["HEAD"] ((:[]) . fromUTF8BS) pattern
   output <- readProcessStdout_ $ proc "git" args
   case BS.words $ BS.toStrict output of
-    hash:_ -> pure hash
+    hash:_ -> pure $ Tag hash
     [] -> die $ "Failed to parse output of git " <> unwords args
 
 -- | Pretty prints SRP changes, with output like:
@@ -103,7 +107,7 @@ prettyPatches srps = "The following packages will be updated:\n"
   <> foldMap prettyChange srps
   where
     prettyChange (Patch SRP { location, tag } newTag) =
-      "  " <> location <> " " <> tag <> " -> " <> newTag <> "\n"
+      "  " <> unLocation location <> " " <> unTag tag <> " -> " <> unTag newTag <> "\n"
 
 -- Replace SRP tags with new tags in raw cabal.project
 applyPatches :: [Patch] -> ByteString -> ByteString
@@ -111,7 +115,7 @@ applyPatches srps = BS.unlines . fmap f . zip [1..] . BS.lines
   where
     f (lineNum, line) = case Map.lookup lineNum newTags of
       Nothing -> line
-      Just (col, newTag) -> BS.take (pred col) line <> newTag
+      Just (col, newTag) -> BS.take (pred col) line <> unTag newTag
     newTags = newTagsByLine srps
 
 newTagsByLine :: [Patch] -> Map Int (Int, Tag)
