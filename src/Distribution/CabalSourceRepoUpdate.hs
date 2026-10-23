@@ -1,5 +1,13 @@
 {-# LANGUAGE OverloadedStrings #-}
-module Distribution.CabalSourceRepoUpdate where
+module Distribution.CabalSourceRepoUpdate
+( Location
+, Tag
+, SRP (..)
+, extract
+, update
+, prettyChanges
+, replace
+) where
 
 import Distribution.Fields qualified as C
 import qualified Data.ByteString as BS
@@ -12,8 +20,7 @@ import Data.Map.Strict (Map)
 import Data.Map.Strict qualified as Map
 import System.Process.Typed (readProcessStdout_, proc)
 import Distribution.Utils.Generic (fromUTF8BS)
-import System.Exit (die, exitFailure)
-import System.Environment (getArgs)
+import System.Exit (die)
 
 
 type Location = ByteString
@@ -106,19 +113,3 @@ newTagsByLine = foldl' addTag Map.empty
   where
     addTag m SRP { tagPos = C.Position line col, newTag = Just newTag } = Map.insert line (col, newTag) m
     addTag m _ = m
-
-main :: IO ()
-main = do
-  args <- getArgs
-  projectFile <- case args of
-    [fileName] -> pure fileName
-    [] -> pure "cabal.project"
-    _ -> do
-      putStrLn "usage: cabal-source-repo-update [<project file>]"
-      exitFailure
-  contents <- BS.readFile projectFile
-  let Right fields = C.readFields contents
-  let srps = extract fields
-  srps' <- traverse update srps
-  BS.putStrLn $ prettyChanges srps'
-  BS.writeFile projectFile $ replace srps' contents

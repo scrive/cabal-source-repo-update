@@ -34,7 +34,9 @@ executable cabal-source-repo-update
     main-is:          Main.hs
     build-depends:
         base >=4.20 && <4.22,
+        bytestring,
         cabal-source-repo-update,
+        Cabal-syntax,
 
     hs-source-dirs:   app
     default-language: GHC2021
