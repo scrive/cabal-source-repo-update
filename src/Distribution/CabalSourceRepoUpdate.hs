@@ -20,6 +20,7 @@ import Distribution.Fields qualified as C
 import Distribution.Parsec.Position qualified as C
 import Distribution.Utils.Generic (fromUTF8BS)
 import System.Exit (die)
+import System.IO (stderr)
 import System.Process.Typed (readProcessStdout_, proc)
 
 
@@ -77,7 +78,7 @@ findField fn = firstJust f
 -- | Query repo for latest tag
 update :: SRP -> IO (Maybe Patch)
 update srp = do
-  BS.putStrLn $ "ℹ️ Checking " <> location srp
+  BS.hPutStrLn stderr $ "ℹ️ Checking " <> location srp
   newTag <- fetchHeadHash $ location srp
   pure $ if newTag == tag srp then Nothing else Just $ Patch srp newTag
 
