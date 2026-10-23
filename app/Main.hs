@@ -18,6 +18,6 @@ main = do
   contents <- BS.readFile projectFile
   let Right fields = C.readFields contents
   let srps = extract fields
-  srps' <- traverse update srps
-  BS.putStr $ prettyChanges srps'
-  BS.writeFile projectFile $ replace srps' contents
+  patches <- traverse update srps
+  BS.putStr $ prettyPatches patches
+  BS.writeFile projectFile $ applyPatches patches contents

@@ -5,8 +5,8 @@ module Distribution.CabalSourceRepoUpdate
 , SRP (..)
 , extract
 , update
-, prettyChanges
-, replace
+, prettyPatches
+, applyPatches
 ) where
 
 import Data.ByteString (ByteString)
@@ -27,13 +27,16 @@ type Location = ByteString
 
 type Tag = ByteString
 
--- | source-repository-package with optional update
+-- | The @source-repository-package@ info we need
 data SRP = SRP
   { location :: Location
   , tag :: Tag
   , tagPos :: C.Position
-  , newTag :: Maybe Tag
   }
+  deriving Show
+
+-- | A 'SRP' where the 'Tag' has to be replaced with the provided one
+data Patch = Patch SRP Tag
   deriving Show
 
 -- Extract SRPs from cabal.project
@@ -61,7 +64,6 @@ stanzaToSRP fs = SRP
   <$> fmap fieldLinesValue locField
   <*> fmap fieldLinesValue tagField
   <*> fmap fieldLinesPos tagField
-  <*> pure Nothing
   where
     locField = findField "location" fs
     tagField = findField "tag" fs
@@ -73,11 +75,11 @@ findField fn = firstJust f
     f _ = Nothing
 
 -- | Query repo for latest tag
-update :: SRP -> IO SRP
+update :: SRP -> IO Patch
 update srp = do
   BS.putStrLn $ "Checking " <> location srp
   newTag <- fetchHeadHash $ location srp
-  pure $ srp { newTag = Just newTag }
+  pure $ Patch srp newTag
 
 fetchHeadHash :: Location -> IO Tag
 fetchHeadHash loc = do
@@ -91,25 +93,24 @@ fetchHeadHash loc = do
 --     The following packages will be updated
 --       <location1: <old_tag> -> <new_tag>
 --       <location2>: <old_tag> -> <new_tag>
-prettyChanges :: [SRP] -> ByteString
-prettyChanges srps = "The following packages will be updated:\n"
+prettyPatches :: [Patch] -> ByteString
+prettyPatches srps = "The following packages will be updated:\n"
   <> foldMap prettyChange srps
   where
-    prettyChange SRP { location, tag, newTag = Just newTag } =
+    prettyChange (Patch SRP { location, tag } newTag) =
       "  " <> location <> " " <> tag <> " -> " <> newTag <> "\n"
-    prettyChange _ = ""
 
 -- Replace SRP tags with new tags in raw cabal.project
-replace :: [SRP] -> ByteString -> ByteString
-replace srps = BS.unlines . fmap f . zip [1..] . BS.lines
+applyPatches :: [Patch] -> ByteString -> ByteString
+applyPatches srps = BS.unlines . fmap f . zip [1..] . BS.lines
   where
     f (lineNum, line) = case Map.lookup lineNum newTags of
       Nothing -> line
       Just (col, newTag) -> BS.take (pred col) line <> newTag
     newTags = newTagsByLine srps
 
-newTagsByLine :: [SRP] -> Map Int (Int, Tag)
+newTagsByLine :: [Patch] -> Map Int (Int, Tag)
 newTagsByLine = foldl' addTag Map.empty
   where
-    addTag m SRP { tagPos = C.Position line col, newTag = Just newTag } = Map.insert line (col, newTag) m
-    addTag m _ = m
+    addTag m (Patch SRP { tagPos = C.Position line col } newTag) =
+      Map.insert line (col, newTag) m
