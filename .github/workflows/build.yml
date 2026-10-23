@@ -9,7 +9,7 @@ on:
 
 jobs:
   build:
-    runs-on: aws-large-ubuntu-latest
+    runs-on: ubuntu-latest
     steps:
 
       - uses: NixOS/nix-installer-action@main
@@ -18,5 +18,7 @@ jobs:
             experimental-features = nix-command flakes
 
       - uses: actions/checkout@v7
+
+      - run: nix flake check
 
       - run: nix build
