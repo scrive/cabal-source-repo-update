@@ -8,7 +8,7 @@ on:
 
 jobs:
   release:
-    runs-on: aws-large-ubuntu-latest
+    runs-on: ubuntu-latest
     steps:
 
       - uses: NixOS/nix-installer-action@main
