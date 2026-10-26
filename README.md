@@ -16,6 +16,12 @@ source-repository-package
 then update it by running `cabal-source-repo-update`.
 The `tag` field will be replaced with the latest `HEAD`.
 
+> [!NOTE]
+>
+> `cabal-install` will emit a warning about unknown fields.
+> Issue [cabal#12480](https://github.com/haskell/cabal/issues/12480)
+> proposes to make it ignore fields that start with `x-`.
+
 ## Configuration
 
 You can configure the tool's behavior by setting the following `x-` fields
