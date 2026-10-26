@@ -1,0 +1,28 @@
+name: Update source-repository-packages
+description: |
+  Update your cabal.project's source-repository-packages with cabal-source-repo-update
+
+inputs:
+  project-file:
+    description: Path of cabal.project.
+    default: cabal.project
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Fetch cabal-source-repo-update
+      env:
+        GH_TOKEN: ${{ github.token }}
+      shell: bash
+      run: |
+        VERSION=$(grep ^version: "$GITHUB_ACTION_PATH/cabal-source-repo-update.cabal" | awk '{print $2}')
+        mkdir -p ~/.local/bin
+        gh release download "v$VERSION" -R scrive/cabal-source-repo-update --output ~/.local/bin/cabal-source-repo-update --pattern cabal-source-repo-update-${{ runner.arch }}-${{ runner.os }}
+        gh release verify-asset "v$VERSION" -R scrive/cabal-source-repo-update ~/.local/bin/cabal-source-repo-update
+        chmod +x ~/.local/bin/cabal-source-repo-update
+    - name: Run cabal-source-repo-update
+      env:
+        PROJECT_FILE: ${{ inputs.project-file }}
+      shell: bash
+      run: ~/.local/bin/cabal-source-repo-update "$PROJECT_FILE"

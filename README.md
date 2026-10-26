@@ -22,6 +22,49 @@ The `tag` field will be replaced with the latest `HEAD`.
 > Issue [cabal#12480](https://github.com/haskell/cabal/issues/12480)
 > proposes to make it ignore fields that start with `x-`.
 
+### GitHub Action
+
+This repository provides a GitHub Action. You can add it to a workflow like so:
+
+```yaml
+      - uses: scrive/cabal-source-repo-update
+        with:
+          project-file: path/to/my-cabal.project
+```
+
+<details>
+<summary>Full example of a monthly scheduled source-repository-package update</summary>
+
+```yaml
+name: Update source-repository-packages
+on:
+  workflow_dispatch: {}
+  schedule:
+    - cron: "0 0 1 * *"
+
+jobs:
+  source-repository-package-update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout
+      - uses: scrive/cabal-source-repo-update
+        with:
+          project-file: cabal.project
+      - name: Create PR
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          git checkout -b source-repository-package-update/${{ github.run_id }}
+          git add cabal.project
+          git config --global user.email "<>"
+          git config --global user.name "cabal-source-repo-update bot"
+          git commit -m "Update source-repository-packages"
+          git push -u origin source-repository-package-update/${{ github.run_id }}
+          gh pr create --title "Update source-repository-packages" --label dependencies
+```
+
+</details>
+
 ## Configuration
 
 You can configure the tool's behavior by setting the following `x-` fields
