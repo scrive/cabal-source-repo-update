@@ -48,9 +48,9 @@ jobs:
       # available in `uses`.
       #     - uses: scrive/cabal-source-repo-update@${{ github.ref_name }}
       # https://docs.github.com/en/actions/reference/workflows-and-actions/contexts#context-availability
-      # Instead, we use an unversioned reference,
-      # which hopefully points to the release that was just made.
-      - uses: scrive/cabal-source-repo-update
+      # Instead, we use HEAD, which in most cases will be the same commit as
+      # the release that was just made.
+      - uses: scrive/cabal-source-repo-update@HEAD
         with:
           project-file: test/cabal.project.test-self
       - run: grep ${{ github.sha }} test/cabal.project.test-self
