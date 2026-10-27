@@ -1,5 +1,9 @@
 # Revision history for cabal-source-repo-update
 
+## 0.1.2.0 -- 2026-10-27
+
+* Provide a GitHub Action (see README)
+
 ## 0.1.1.0 -- 2026-10-26
 
 * Add support for ref patterns (see README)

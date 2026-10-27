@@ -1,6 +1,6 @@
 cabal-version:      3.0
 name:               cabal-source-repo-update
-version:            0.1.1.0
+version:            0.1.2.0
 synopsis:           Update your source-repository-packages
 -- description:
 homepage:           https://github.com/scrive/cabal-source-repo-update
