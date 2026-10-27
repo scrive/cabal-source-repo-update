@@ -44,7 +44,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
-      - uses: scrive/cabal-source-repo-update@${{ github.ref_name }}
+      # NOTE: We can't do the following because the `github` context is not
+      # available in `uses`.
+      #     - uses: scrive/cabal-source-repo-update@${{ github.ref_name }}
+      # https://docs.github.com/en/actions/reference/workflows-and-actions/contexts#context-availability
+      # Instead, we use an unversioned reference,
+      # which hopefully points to the release that was just made.
+      - uses: scrive/cabal-source-repo-update
         with:
           project-file: test/cabal.project.test-self
       - run: grep ${{ github.sha }} test/cabal.project.test-self
