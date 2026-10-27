@@ -27,13 +27,19 @@ The `tag` field will be replaced with the latest `HEAD`.
 This repository provides a GitHub Action. You can add it to a workflow like so:
 
 ```yaml
-      - uses: scrive/cabal-source-repo-update
+      - uses: scrive/cabal-source-repo-update@HEAD # Replace HEAD with the latest version
         with:
           project-file: path/to/my-cabal.project
 ```
 
 <details>
 <summary>Full example of a monthly scheduled source-repository-package update</summary>
+
+> [!IMPORTANT]
+>
+> For this to work you should enable
+> "Allow GitHub Actions to create and approve pull requests"
+> under "Settings → Actions → General".
 
 ```yaml
 name: Update source-repository-packages
@@ -42,12 +48,16 @@ on:
   schedule:
     - cron: "0 0 1 * *"
 
+permissions:
+  contents: write
+  pull-requests: write
+
 jobs:
   source-repository-package-update:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout
-      - uses: scrive/cabal-source-repo-update
+      - uses: actions/checkout@v7
+      - uses: scrive/cabal-source-repo-update@HEAD # Replace HEAD with the latest version
         with:
           project-file: cabal.project
       - name: Create PR
@@ -60,7 +70,7 @@ jobs:
           git config --global user.name "cabal-source-repo-update bot"
           git commit -m "Update source-repository-packages"
           git push -u origin source-repository-package-update/${{ github.run_id }}
-          gh pr create --title "Update source-repository-packages" --label dependencies
+          gh pr create --fill
 ```
 
 </details>
